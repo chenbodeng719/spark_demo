@@ -38,7 +38,7 @@ def test1(spark):
     df.show()
     # df.groupBy("category").count().show(truncate=False)
 
-    dtstr = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H%M')
+    dtstr = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H%M%S')
     df.groupBy("category").count().write.parquet("s3a://htm-test/chenbodeng/datatest/%s" % (dtstr,))
 
 
