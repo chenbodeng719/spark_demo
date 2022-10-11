@@ -43,6 +43,18 @@ def test1(spark):
     df.groupBy("category").count().write.parquet("s3a://htm-test/chenbodeng/datatest/%s" % (dtstr,))
 
 
+def test_emr(spark):
+    path = 's3a://htm-bi-data-test/bi-collection/year=2022/month=06/day=10/1654819200006-100.parquet'
+    # path = "s3a://htm-bi-data-test/bi-collection/year=2022/month=06/day=10/"
+    df = spark.read.parquet(path)
+    df.show()
+    # df.groupBy("category").count().show(truncate=False)
+
+    ts = int(time.time())
+    dtstr = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H%M%S')
+    df.groupBy("category").count().write.parquet("s3://htm-test/chenbodeng/datatest/%s" % (dtstr,))
+
+
 
 def test2(spark):
     path = 's3a://htm-test/chenbodeng/ret/100901.parquet'
@@ -54,5 +66,5 @@ def test2(spark):
 
 if __name__ == "__main__":
     spark = get_spark()
-    test1(spark)
+    test_emr(spark)
 
