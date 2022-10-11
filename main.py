@@ -8,7 +8,7 @@ from pyspark.sql import SparkSession
 
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
-import datetime
+import datetime,time
 
 
 def get_spark():
@@ -38,6 +38,7 @@ def test1(spark):
     df.show()
     # df.groupBy("category").count().show(truncate=False)
 
+    ts = int(time.time())
     dtstr = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H%M%S')
     df.groupBy("category").count().write.parquet("s3a://htm-test/chenbodeng/datatest/%s" % (dtstr,))
 
