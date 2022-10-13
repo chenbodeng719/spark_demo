@@ -9,6 +9,7 @@ from pyspark.sql import SparkSession
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 import datetime,time
+from pyspark.sql import SQLContext
 
 
 def get_spark():
@@ -52,7 +53,10 @@ def test_emr(spark):
 
     ts = int(time.time())
     dtstr = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H%M%S')
-    df.groupBy("category").count().write.parquet("s3://htm-test/chenbodeng/datatest/%s" % (dtstr,))
+    new_path = "s3://htm-test/chenbodeng/datatest/%s" % (dtstr,)
+    df.groupBy("category").count().write.parquet(new_path)
+    df = spark.read.parquet(new_path)
+    df.show()
 
 
 
@@ -64,7 +68,48 @@ def test2(spark):
     # df.groupBy("category").count().show(truncate=False)
     # df.groupBy("category").count().write.parquet("s3a://htm-test/chenbodeng/ret/100901.parquet")
 
+def test_spark_hbase(spark):
+    
+    sc = spark.sparkContext
+    sqlc = SQLContext(sc)
+
+    data_source_format = 'org.apache.hadoop.hbase.spark'
+    # data_source_format = 'org.apache.spark.sql.execution.datasources.hbase'
+
+    df = sc.parallelize([('a', '1.0'), ('b', '2.0')]).toDF(schema=['col0', 'col1'])
+
+    # ''.join(string.split()) in order to write a multi-line JSON string here.
+    catalog = ''.join("""{
+        "table":{"name":"mytable"},
+        "rowkey":"key",
+        "columns":{
+            "col0":{"cf":"rowkey", "col":"key", "type":"string"},
+            "col1":{"cf":"cf", "col":"col1", "type":"string"}
+        }
+    }""".split())
+
+
+    # Writing
+    df.write.options(catalog=catalog).format(data_source_format).save()
+    # df.write.options(catalog=catalog).save()
+
+    # Reading
+    df = sqlc.read.options(catalog=catalog).format(data_source_format).load()
+    df.show()
+
+import argparse
+
 if __name__ == "__main__":
     spark = get_spark()
-    test_emr(spark)
+
+    parser = argparse.ArgumentParser(description='emr submit')
+    parser.add_argument('--cate',help='submit cate', required=False)
+    args = parser.parse_args()
+    cate = args.cate
+    if cate == "spark_hbase":
+        test_spark_hbase(spark)
+    elif cate == "spark_hbase_shc":
+        test_spark_hbase(spark)
+    else:
+        test_emr(spark)
 
