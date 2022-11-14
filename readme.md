@@ -9,21 +9,64 @@
 ## main func
 ### spark
 - main.py
-- setup.sh
-### hbase
-- main_hbase.py
-- setup_hbase.sh
+- setup.sh4
+- command
 ```
-aws s3 cp main_hbase.py s3://htm-test/chenbodeng/mytest/ && aws s3 cp setup_hbase.sh s3://htm-test/chenbodeng/mytest/
+python -u main.py --cate spark_hbase_local
+```
+## command
+- common
+```
+aws s3 cp main.py s3://htm-test/chenbodeng/mytest/
+aws s3 cp setup_spark.sh s3://htm-test/chenbodeng/mytest/
+aws s3 cp s3://htm-test/chenbodeng/mytest/hsconn.zip ./
 
-aws s3 cp main.py s3://htm-test/chenbodeng/mytest/ 
-aws s3 cp jar/hbase-spark-1.0.0.jar s3://htm-test/chenbodeng/mytest/ && aws s3 cp jar/hbase-client-3.0.0-alpha-3.jar s3://htm-test/chenbodeng/mytest/ && aws s3 cp jar/scala-reflect-2.11.12.jar s3://htm-test/chenbodeng/mytest/ && aws s3 cp jar/scala-library-2.11.12.jar s3://htm-test/chenbodeng/mytest/ && aws s3 cp jar/spark-sql_2.11-2.4.0.jar s3://htm-test/chenbodeng/mytest/ && aws s3 cp jar/scalatest_2.11-3.0.5.jar s3://htm-test/chenbodeng/mytest/ && aws s3 cp jar/hbase-client-2.1.0.jar s3://htm-test/chenbodeng/mytest/ && aws s3 cp jar/shc-core-1.1.0.3.1.7.5000-4.jar s3://htm-test/chenbodeng/mytest/
+aws s3 rm s3://htm-test/chenbodeng/hbase/ --recursive
 
 
+wget https://repo1.maven.org/maven2/org/apache/hive/hive-hbase-handler/3.1.3/hive-hbase-handler-3.1.3.jar
+wget https://repo1.maven.org/maven2/org/apache/hive/hive-hbase-handler/3.1.2/hive-hbase-handler-3.1.2.jar
 
-aws s3 cp jar/hbase-shaded-mapreduce-2.4.9.jar s3://htm-test/chenbodeng/mytest/
-aws s3 cp jar/hbase-spark-1.0.1_spark-3.2.0-hbase-2.4.9-cern1_1.jar s3://htm-test/chenbodeng/mytest/
-aws s3 cp jar/hbase-spark-protocol-shaded-1.0.1_spark-3.2.0-hbase-2.4.9-cern1_1.jar s3://htm-test/chenbodeng/mytest/
-aws s3 cp hbase.sh s3://htm-test/chenbodeng/mytest/
+```
+
+
+- hbase
+```
+create 'mytable','f1'
+put 'mytable', 'row1', 'f1:name', 'Gokhan'
+put 'mytable', 'row2', 'f1:name', 'test'
+put 'mytable', 'test3', 'f1:name', 'test3'
+put 'mytable', 'test4', 'f1:name', 'test3'
+scan 'mytable'
+scan 'candidate', {'LIMIT' => 5}
+major_compact 'candidate'
+```
+
+- hive
+
+
+```
+CREATE EXTERNAL TABLE myhivetable (rowkey STRING, name STRING) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
+WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,f1:name')
+TBLPROPERTIES ('hbase.table.name' = 'mytable');	
+
+CREATE TABLE IF NOT EXISTS myhivetable_out
+STORED AS PARQUET
+AS 
+SELECT * FROM myhivetable limit 2
+
+CREATE EXTERNAL TABLE parquet_hive (
+  foo string
+) STORED AS PARQUET
+LOCATION 's3://htm-test/chenbodeng/mytest/parquet_hive';
+
+INSERT INTO parquet_hive SELECT name FROM myhivetable;
+
+
+aws s3 cp s3://htm-test/chenbodeng/mytest/hive-site.xml ./
+
+
+INSERT INTO TABLE myhivetable VALUES ('test','test');
+
 
 ```

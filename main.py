@@ -1,20 +1,10 @@
-
-import sys,os
-from random import random
-from operator import add
-from tabnanny import verbose
-
-from pyspark.sql import SparkSession
-
+from tkinter import E
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 import datetime,time
 from pyspark.sql import SQLContext
 
 
-def get_spark():
-    spark = SparkSession.builder.appName('myjob').getOrCreate()
-    return spark
 
 
 
@@ -71,45 +61,89 @@ def test2(spark):
 def test_spark_hbase(spark):
     
     sc = spark.sparkContext
-    sqlc = SQLContext(sc)
-
     data_source_format = 'org.apache.hadoop.hbase.spark'
     # data_source_format = 'org.apache.spark.sql.execution.datasources.hbase'
 
-    df = sc.parallelize([('a', '1.0'), ('b', '2.0')]).toDF(schema=['col0', 'col1'])
 
     # ''.join(string.split()) in order to write a multi-line JSON string here.
     catalog = ''.join("""{
-        "table":{"name":"mytable"},
+        "table":{"namespace":"default", "name":"mytable"},
         "rowkey":"key",
         "columns":{
             "col0":{"cf":"rowkey", "col":"key", "type":"string"},
-            "col1":{"cf":"cf", "col":"col1", "type":"string"}
+            "col1":{"cf":"f1", "col":"name", "type":"string"}
         }
     }""".split())
-
-
-    # Writing
-    df.write.options(catalog=catalog).format(data_source_format).save()
-    # df.write.options(catalog=catalog).save()
-
     # Reading
-    df = sqlc.read.options(catalog=catalog).format(data_source_format).load()
+    sqlc = SQLContext(sc)
+    tname = "mytable"
+    tmap = "col0 STRING :key, col1 STRING f1:name"
+    print(sc.getConf().getAll())
+    df = sqlc.read.format(data_source_format) \
+        .option('hbase.table',tname) \
+        .option('hbase.columns.mapping', tmap) \
+        .option('hbase.spark.use.hbasecontext', False) \
+        .load()
     df.show()
+    # Writing 1
+    # df = sc.parallelize([('a', '1.0'), ('b', '2.0')]).toDF(schema=['col0', 'col1'])
+    # df.write.options(catalog=catalog).format(data_source_format).save()
+
+    # Writing 2
+    df = sc.parallelize([('a', '1.0'), ('b', '2.0')]).toDF(schema=['col0', 'col1'])
+    df.write.format("org.apache.hadoop.hbase.spark") \
+    .option("hbase.columns.mapping",tmap) \
+    .option("hbase.table", tname) \
+    .option("hbase.spark.use.hbasecontext", False) \
+    .save()
+
+    df = sqlc.read.options(catalog=catalog).option("hbase.spark.pushdown.columnfilter", False).format(data_source_format).load()
+    df.show()
+
+
+
+def spark_hive(spark):
+    tbl = "mysparktable"
+    spark.sql("create table tmp select * from myhivetable" % (tbl,))
+    df1=spark.sql("SHOW TABLES")
+    df1.show()
+    spark.table(tbl).show()
+    sc = spark.sparkContext
+    idx = int(time.time())
+    df = sc.parallelize([(idx, 'a1.0'), ]).toDF(schema=['key', 'value'])
+    df.write.insertInto(tbl, overwrite=False)
+    spark.table(tbl).show()
+
+def spark_hive_2(spark):
+    sc = spark.sparkContext
+    tbl = "myhivetable"
+    df1 = spark.sql("SHOW TABLES")
+    df1.show()
+    spark.table(tbl).show()
+    idx = int(time.time())
+    df = sc.parallelize([(str(idx), 'a1.0'), ]).toDF(schema=['key', 'value'])
+    df.write.insertInto(tbl, overwrite=False)
+    spark.table(tbl).show()
+
 
 import argparse
 
 if __name__ == "__main__":
-    spark = get_spark()
-
     parser = argparse.ArgumentParser(description='emr submit')
     parser.add_argument('--cate',help='submit cate', required=False)
     args = parser.parse_args()
     cate = args.cate
     if cate == "spark_hbase":
+        spark = SparkSession.builder.appName("spark_hbase_job").getOrCreate()
         test_spark_hbase(spark)
-    elif cate == "spark_hbase_shc":
-        test_spark_hbase(spark)
+    elif cate == "spark_hive":
+        spark = SparkSession.builder.appName("spark_hive_job").enableHiveSupport().getOrCreate()
+        sc = spark.sparkContext
+        spark_hive(spark)
+    elif cate == "spark_hive_2":
+        spark = SparkSession.builder.appName("spark_hive_2_job").enableHiveSupport().getOrCreate()
+        sc = spark.sparkContext
+        spark_hive_2(spark)
     else:
-        test_emr(spark)
+        raise Exception("err cate")
 
