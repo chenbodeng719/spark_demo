@@ -12,7 +12,7 @@ findspark.add_jars(jar_str)
 findspark._add_to_submit_args("--conf spark.driver.extraClassPath=/home/chenbodeng/app/spark-3.1.2-bin-hadoop3.2")
 findspark._add_to_submit_args("--conf spark.executor.extraClassPath=/home/chenbodeng/app/spark-3.1.2-bin-hadoop3.2")
 
-print(jar_str)
+# print(jar_str)
 
 import pyspark,time
 from pyspark.sql import SQLContext,SparkSession
@@ -97,10 +97,13 @@ def myjob_2():
     sqlc = SQLContext(sc)
     data_source_format = 'org.apache.hadoop.hbase.spark'
     # aws s3 ls s3://htm-bi-data-prod/bi-collection-v2/year=2022/month=10/day=31/
-    path = "s3a://htm-bi-data-test/bi-collection-v2/year=2022/month=11/day=07/"
+    path = "s3a://htm-bi-data-test/bi-collection-v2/year=2022/month=11/day=15/"
     df = sqlc.read.parquet(path)
-    df.show()
-    # df.filter(df.url.like("%candidates_rank_machine_learning%") ).show()
+    # df.show()
+    # df.filter(df.url.like("xxxx") ).show()
+    # df.filter(df.event_name == "/login^^^^^^Next" ).show()
+    # df.filter(df.event_name == "good_fit" ).show()
+    df.filter(df.event_name == "ai_sourcing_task" ).show()
     # print(data_top)
 
 

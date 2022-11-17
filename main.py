@@ -3,68 +3,14 @@ from pyspark import SparkConf
 from pyspark.sql import SparkSession
 import datetime,time
 from pyspark.sql import SQLContext
+import argparse
 
 
-
-
-
-
-def oper_s3(spark):
-    sc = spark.sparkContext
-    # A text dataset is pointed to by path.
-    # The path can be either a single text file or a directory of text files
-    path = "s3a://htm-test/chenbodeng/test"
-    counts = sc.textFile(path)
-    llist = counts.collect()
-    # print line one by line
-    for line in llist:
-        print(line)
-    counts.saveAsTextFile("s3a://htm-test/chenbodeng/ret1")
-
-
-def test1(spark):
-    path = 's3a://htm-bi-data-test/bi-collection/year=2022/month=06/day=10/1654819200006-100.parquet'
-    # path = "s3a://htm-bi-data-test/bi-collection/year=2022/month=06/day=10/"
-    df = spark.read.parquet(path)
-    df.show()
-    # df.groupBy("category").count().show(truncate=False)
-
-    ts = int(time.time())
-    dtstr = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H%M%S')
-    df.groupBy("category").count().write.parquet("s3a://htm-test/chenbodeng/datatest/%s" % (dtstr,))
-
-
-def test_emr(spark):
-    path = 's3a://htm-bi-data-test/bi-collection/year=2022/month=06/day=10/1654819200006-100.parquet'
-    # path = "s3a://htm-bi-data-test/bi-collection/year=2022/month=06/day=10/"
-    df = spark.read.parquet(path)
-    df.show()
-    # df.groupBy("category").count().show(truncate=False)
-
-    ts = int(time.time())
-    dtstr = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H%M%S')
-    new_path = "s3://htm-test/chenbodeng/datatest/%s" % (dtstr,)
-    df.groupBy("category").count().write.parquet(new_path)
-    df = spark.read.parquet(new_path)
-    df.show()
-
-
-
-def test2(spark):
-    path = 's3a://htm-test/chenbodeng/ret/100901.parquet'
-    # path = "s3a://htm-bi-data-test/bi-collection/year=2022/month=06/day=10/"
-    df = spark.read.parquet(path)
-    df.show()
-    # df.groupBy("category").count().show(truncate=False)
-    # df.groupBy("category").count().write.parquet("s3a://htm-test/chenbodeng/ret/100901.parquet")
 
 def test_spark_hbase(spark):
-    
     sc = spark.sparkContext
     data_source_format = 'org.apache.hadoop.hbase.spark'
     # data_source_format = 'org.apache.spark.sql.execution.datasources.hbase'
-
-
     # ''.join(string.split()) in order to write a multi-line JSON string here.
     catalog = ''.join("""{
         "table":{"namespace":"default", "name":"mytable"},
@@ -101,32 +47,14 @@ def test_spark_hbase(spark):
     df.show()
 
 
-
-def spark_hive(spark):
-    tbl = "mysparktable"
-    spark.sql("create table tmp select * from myhivetable" % (tbl,))
-    df1=spark.sql("SHOW TABLES")
-    df1.show()
-    spark.table(tbl).show()
+def test_s3_parquet(spark):
     sc = spark.sparkContext
-    idx = int(time.time())
-    df = sc.parallelize([(idx, 'a1.0'), ]).toDF(schema=['key', 'value'])
-    df.write.insertInto(tbl, overwrite=False)
-    spark.table(tbl).show()
-
-def spark_hive_2(spark):
-    sc = spark.sparkContext
-    tbl = "myhivetable"
-    df1 = spark.sql("SHOW TABLES")
-    df1.show()
-    spark.table(tbl).show()
-    idx = int(time.time())
-    df = sc.parallelize([(str(idx), 'a1.0'), ]).toDF(schema=['key', 'value'])
-    df.write.insertInto(tbl, overwrite=False)
-    spark.table(tbl).show()
+    sqlc = SQLContext(sc)
+    path = "s3a://htm-bi-data-test/bi-collection-v2/year=2022/month=11/day=15/"
+    df = sqlc.read.parquet(path)
+    df.filter(df.event_name == "ai_sourcing_task" ).show()
 
 
-import argparse
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='emr submit')
@@ -134,16 +62,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     cate = args.cate
     if cate == "spark_hbase":
-        spark = SparkSession.builder.appName("spark_hbase_job").getOrCreate()
+        spark = SparkSession.builder.appName("spark_hbase").getOrCreate()
         test_spark_hbase(spark)
-    elif cate == "spark_hive":
-        spark = SparkSession.builder.appName("spark_hive_job").enableHiveSupport().getOrCreate()
-        sc = spark.sparkContext
-        spark_hive(spark)
-    elif cate == "spark_hive_2":
-        spark = SparkSession.builder.appName("spark_hive_2_job").enableHiveSupport().getOrCreate()
-        sc = spark.sparkContext
-        spark_hive_2(spark)
+    elif cate == "s3_parquet":
+        spark = SparkSession.builder.appName("spark_hbase_job").getOrCreate()
+        test_s3_parquet(spark)
     else:
         raise Exception("err cate")
 
