@@ -106,7 +106,24 @@ def myjob_2():
     df.filter(df.event_name == "ai_sourcing_task" ).show()
     # print(data_top)
 
+def backlog_job():
+    sc = pyspark.SparkContext(appName="backlog_job",)
+    sqlc = SQLContext(sc)
+    from pyspark.sql import functions as F
+    path = "s3a://hiretual-ml-data-test/backlog_test/year=2022/month=11/day=23/"
+    df = sqlc.read.parquet(path)
+    # df.show()
+    uniqueId = "requestId"
+    reqDf = df.filter(df.requestResp == "" ).drop_duplicates(subset=[uniqueId])
+    respDf = df.filter(df.requestBody == "" ).drop_duplicates(subset=[uniqueId])
+    respDf = respDf.alias('respDf')
+    reqDf = reqDf.alias('reqDf')
+    finalDf = respDf.join(reqDf,getattr(respDf,uniqueId) ==  getattr(reqDf,uniqueId),"inner").select('respDf.*',F.col("reqDf.requestBody").alias("requestBodyReq"),F.col("reqDf.%s" % (uniqueId,)).alias("%sReq" % (uniqueId,)))
+    finalDf.show()
+
+
 
 
 if __name__ == "__main__":
-    myjob_2()
+    # myjob_2()
+    backlog_job()
