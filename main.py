@@ -7,7 +7,7 @@ import argparse
 from pyspark.sql import functions as F
 import os
 from util import get_time_part_by_ts,make_date_key
-import json
+import json,logging
 
 
 def test_spark_hbase(spark):
@@ -83,7 +83,9 @@ def merge_backlog(runenv):
     reqDf = reqDf.alias('reqDf')
     finalDf = respDf.join(reqDf,getattr(respDf,uniqueId) ==  getattr(reqDf,uniqueId),"inner").select('respDf.*',F.col("reqDf.requestBody").alias("requestBodyReq"),F.col("reqDf.%s" % (uniqueId,)).alias("%sReq" % (uniqueId,)))
     finalDf.show()
+    logging.info("-------------wpath %s" % (wpath,))
     finalDf.write.mode("overwrite").parquet(wpath)
+    
 
 
 
