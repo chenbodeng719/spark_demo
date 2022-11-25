@@ -83,7 +83,9 @@ def merge_backlog(runenv):
     reqDf = reqDf.alias('reqDf')
     finalDf = respDf.join(reqDf,getattr(respDf,uniqueId) ==  getattr(reqDf,uniqueId),"inner").select('respDf.*',F.col("reqDf.requestBody").alias("requestBodyReq"),F.col("reqDf.%s" % (uniqueId,)).alias("%sReq" % (uniqueId,)))
     finalDf.show()
-    logging.info("-------------wpath %s" % (wpath,))
+    msg = "-------------wpath %s" % (wpath,)
+    logging.info("log: "+msg)
+    print("print: "+msg)
     finalDf.write.mode("overwrite").parquet(wpath)
     
 
