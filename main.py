@@ -57,12 +57,11 @@ def test_s3_parquet(spark):
     df = sqlc.read.parquet(path)
     df.filter(df.event_name == "ai_sourcing_task" ).show()
 
-def merge_backlog(param):
+def merge_backlog(runenv):
     spark = SparkSession.builder.appName("merge_backlog").getOrCreate()
     sc = spark.sparkContext
     sqlc = SQLContext(sc)
     ts = int(time.time())
-    runenv = param.get("runenv",None)
     # tpart = get_time_part_by_ts(ts)
     tpart = get_time_part_by_ts(ts-23*3600)
     date_key = make_date_key(tpart)
@@ -91,10 +90,9 @@ def merge_backlog(param):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='emr submit')
     parser.add_argument('--cate',help='submit cate', required=False)
-    parser.add_argument('--param',help='submit param', required=False)
+    parser.add_argument('--runenv', required=False)
     args = parser.parse_args()
     cate = args.cate
-    param = args.param
     if cate == "spark_hbase":
         spark = SparkSession.builder.appName("spark_hbase").getOrCreate()
         test_spark_hbase(spark)
@@ -102,8 +100,7 @@ if __name__ == "__main__":
         spark = SparkSession.builder.appName("spark_hbase_job").getOrCreate()
         test_s3_parquet(spark)
     elif cate == "merge_backlog":
-        param = json.loads(param)
-        merge_backlog(param)
+        merge_backlog(args.runenv)
     else:
         raise Exception("err cate")
 
