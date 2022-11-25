@@ -102,7 +102,7 @@ if __name__ == "__main__":
         spark = SparkSession.builder.appName("spark_hbase_job").getOrCreate()
         test_s3_parquet(spark)
     elif cate == "merge_backlog":
-        param = json.load(param)
+        param = json.loads(param)
         merge_backlog(param)
     else:
         raise Exception("err cate")
