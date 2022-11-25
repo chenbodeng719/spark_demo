@@ -74,7 +74,7 @@ def merge_backlog(runenv):
         rbucket = "hiretual-ml-data"
         wbucket = "hiretual-ml-data"
         rpath = "s3a://%s/%s/%s/%s" % (rbucket,"dataplat/data","backlog_job",date_key)
-        wpath = "s3a://%s/%s/%s/%s/merge.parquet" % (wbucket,"dataplat/data","merge_log",date_key)
+        wpath = "s3a://%s/%s/%s/%s" % (wbucket,"dataplat/data","merge_log",date_key)
         uniqueId = "ddTraceId"
     df = sqlc.read.parquet(rpath)
     reqDf = df.filter(df.requestResp == "" ).drop_duplicates(subset=[uniqueId])
