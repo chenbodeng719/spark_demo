@@ -17,7 +17,7 @@ sc = pyspark.SparkContext.getOrCreate()
 sqlc = SQLContext(sc)
 
 def gen_click_tbl(runenv,tdate,):
-    rpath = "s3://htm-bi-data-test/bi-collection-v2/year=2022/month=11/day=29/"
+    rpath = "s3a://htm-bi-data-test/bi-collection-v2/year=2022/month=11/day=29/"
     ret = path_exists(sc,rpath)
     if ret:
         print("[gen_click_tbl]%s no exist" % (rpath,))
