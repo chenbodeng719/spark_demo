@@ -20,6 +20,8 @@ def gen_ub_related_table(runenv,ts):
     tpart = get_time_part_by_ts(ts)
     tdate_key = make_date_key(tpart)
     rpath = "s3://htm-bi-data-test/bi-collection-v2/%s" % (tdate_key,)
+    if runenv == "prod":
+        rpath = "s3://htm-bi-data-prod/bi-collection-v2/%s" % (tdate_key,)
     gen_click_table(rpath)
     gen_impression_table(rpath)
 
@@ -31,7 +33,7 @@ def gen_click_table(rpath,):
         print("[gen_click_table]%s no exist" % (rpath,))
         return
     df = sqlc.read.parquet(rpath)
-    click_df = df.filter((df.event_name.like("more_%")) |
+    new_df = df.filter((df.event_name.like("more_%")) |
                         (df.event_name == "reveal_contact_info") |
                         (df.event_name == "candidate_name") |
                         (df.event_name == "external_link_linkedin") &
@@ -49,7 +51,7 @@ def gen_click_table(rpath,):
                             col("rank_info.searchSample").alias("position"),
                             "action"
                             )
-    click_df.show()
+    new_df.show()
 
 
 def gen_impression_table(rpath,):
@@ -72,9 +74,7 @@ def gen_impression_table(rpath,):
     new_df.show()
 
 
-def gen_table(start_date):
-    runenv = os.getenv("RUNENV",None)
-    print("fuck",runenv)
+def gen_table(start_date,runenv):
     now_ts = int(time.time())
     last_date = get_dtstr_by_ts(now_ts-24*3600).split()[0]
     if not start_date:
@@ -94,6 +94,8 @@ def gen_table(start_date):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='emr submit')
     parser.add_argument('--start_date',help='submit start_date', required=False)
+    parser.add_argument('--runenv',help='submit runenv', required=False)
     args = parser.parse_args()
     start_date = args.start_date
-    gen_table(start_date)
+    runenv = args.runenv
+    gen_table(start_date,runenv)
