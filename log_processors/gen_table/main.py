@@ -55,7 +55,7 @@ def gen_click_table(rpath,):
 def gen_impression_table(rpath,):
     ret = path_exists(sc,rpath)
     if not ret:
-        print("[gen_click_table]%s no exist" % (rpath,))
+        print("[gen_impression_table]%s no exist" % (rpath,))
         return
     df = sqlc.read.parquet(rpath)
     new_df = df.filter((df.type == "impression") &
@@ -77,6 +77,8 @@ def gen_table(start_date):
     print("fuck",runenv)
     now_ts = int(time.time())
     last_date = get_dtstr_by_ts(now_ts-24*3600).split()[0]
+    if not start_date:
+        start_date = last_date
     start_ts = get_ts8dtstr(start_date+" 00:00:00")
     last_ts = get_ts8dtstr(last_date+" 00:00:00")
     diff_ts = last_ts - start_ts
