@@ -18,10 +18,15 @@ python -u main.py --cate spark_hbase_local
 - common
 ```
 aws s3 cp main.py s3://htm-test/chenbodeng/mytest/
+aws s3 cp util.py s3://htm-test/chenbodeng/mytest/spark_demo/
 aws s3 cp setup_spark.sh s3://htm-test/chenbodeng/mytest/
 aws s3 cp s3://htm-test/chenbodeng/mytest/hsconn.zip ./
 
 aws s3 rm s3://htm-test/chenbodeng/hbase/ --recursive
+
+
+zip -r spark_demo.zip spark_demo -x spark_demo/jar/\* spark_demo/.git/\*
+aws s3 cp spark_demo.zip s3://htm-test/chenbodeng/mytest/spark_demo/
 
 
 wget https://repo1.maven.org/maven2/org/apache/hive/hive-hbase-handler/3.1.3/hive-hbase-handler-3.1.3.jar

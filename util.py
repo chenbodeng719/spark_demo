@@ -5,6 +5,9 @@ def get_dtstr_by_ts(ts=None):
         ts = time.time()
     return datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
+def get_ts8dtstr(dtstr):
+    return int(time.mktime(datetime.datetime.strptime(dtstr, "%Y-%m-%d %H:%M:%S").timetuple()))
+
 def get_time_part_by_ts(ts=None):
     if not ts:
         ts = int(time.time())
@@ -33,3 +36,12 @@ def make_date_key(tlast):
         day = "0%s" % (tlast["day"],)
     tkey = "year=%s/month=%s/day=%s" % (year,month,day)
     return tkey
+
+
+def path_exists(sc,path):
+    fs = sc._jvm.org.apache.hadoop.fs.FileSystem.get(
+        sc._jvm.java.net.URI.create("s3://" + path.split("/")[2]),
+        sc._jsc.hadoopConfiguration(),
+    )
+    return fs.exists(sc._jvm.org.apache.hadoop.fs.Path(path))
+
