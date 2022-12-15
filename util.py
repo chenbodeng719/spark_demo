@@ -1,4 +1,5 @@
-import time,datetime
+import time,datetime,boto3
+g_s3_res = None
 
 def get_dtstr_by_ts(ts=None):
     if not ts:
@@ -45,3 +46,15 @@ def path_exists(sc,path):
     )
     return fs.exists(sc._jvm.org.apache.hadoop.fs.Path(path))
 
+
+def get_s3_res(refresh=False):
+    global g_s3_res
+    if not g_s3_res or refresh:
+        g_s3_res = boto3.resource('s3')
+    return g_s3_res
+
+
+def del_s3_folder(bucketname, prefix):
+    s3 = get_s3_res()
+    bucket = s3.Bucket(bucketname)
+    bucket.objects.filter(Prefix="%s/" % (prefix,)).delete()

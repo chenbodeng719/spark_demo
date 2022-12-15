@@ -8,3 +8,5 @@ sudo aws s3 cp s3://htm-test/chenbodeng/mytest/hbase-site.xml /home/hadoop/
 cd /home/hadoop
 sudo unzip hsconn.zip
 sudo unzip hbase_jar.zip
+
+pip3 install peewee

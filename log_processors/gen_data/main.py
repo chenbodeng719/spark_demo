@@ -6,8 +6,8 @@ import time,os,sys,argparse
 # s3 relatve path
 # from spark_demo.util import path_exists,make_date_key,get_dtstr_by_ts,get_ts8dtstr,get_time_part_by_ts
 # github relative path
-from util import path_exists,make_date_key,get_dtstr_by_ts,get_ts8dtstr,get_time_part_by_ts
-from log_processors.gen_table.user_activity import filter_user_activity
+from util import path_exists,make_date_key,get_dtstr_by_ts,get_ts8dtstr,get_time_part_by_ts,del_s3_folder
+from log_processors.gen_data.user_activity import filter_user_activity
 
 import pyspark
 from pyspark.sql import SQLContext, SparkSession
@@ -51,6 +51,13 @@ class GenTable():
         df = sqlc.read.parquet(rpath)
         user_activity_df = filter_user_activity(df)
         user_activity_df.show()
+        # pre = "user_activity"
+        # wpath = "s3://hiretual-ml-data-test/dataplat_test/data/%s/%s" % (pre,tdate_key,)
+        # if runenv == "prod":
+        #     wpath = "s3://hiretual-ml-data/dataplat/data/%s/%s" % (pre,tdate_key,)
+        # del_s3_folder(wpath, )
+        # df.to_parquet(wpath, )
+    
     
 
 
