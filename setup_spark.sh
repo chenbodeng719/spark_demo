@@ -9,4 +9,4 @@ cd /home/hadoop
 sudo unzip hsconn.zip
 sudo unzip hbase_jar.zip
 
-pip3 install peewee
+pip3 install boto3
