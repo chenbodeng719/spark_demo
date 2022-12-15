@@ -60,7 +60,7 @@ class GenTable():
         del_s3_folder(wbucket,pre )
         print("rpath",rpath)
         print("wpath",wpath)
-        df.write.parquet(wpath)
+        user_activity_df.write.parquet(wpath)
     
     
 
