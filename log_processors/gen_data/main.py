@@ -58,6 +58,8 @@ class GenTable():
             pre = "dataplat/data/%s/%s" % (tkey,tdate_key,)
         wpath = "s3://%s/%s" % (wbucket,pre,)
         del_s3_folder(wbucket,pre )
+        print("rpath",rpath)
+        print("wpath",wpath)
         df.to_parquet(wpath, )
     
     
