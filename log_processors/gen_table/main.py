@@ -63,5 +63,6 @@ if __name__ == "__main__":
     start_time = args.start_time
     start_date = args.start_date
     runenv = args.runenv
+    print("start_time",start_time)
     gt = GenTable(runenv,start_time,start_date)
     gt.run()
