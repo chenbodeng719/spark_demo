@@ -46,7 +46,7 @@ class GenTable():
             rpath = "s3://htm-bi-data-prod/bi-collection-v2/%s" % (tdate_key,)
         ret = path_exists(sc,rpath)
         if not ret:
-            print("[gen_ube_related_table]%s no exist" % (rpath,))
+            print("[gen_user_activity_table]%s no exist" % (rpath,))
             return
         df = sqlc.read.parquet(rpath)
         user_activity_df = filter_user_activity(df)
