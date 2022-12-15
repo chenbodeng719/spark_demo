@@ -51,12 +51,14 @@ class GenTable():
         df = sqlc.read.parquet(rpath)
         user_activity_df = filter_user_activity(df)
         user_activity_df.show()
-        # pre = "user_activity"
-        # wpath = "s3://hiretual-ml-data-test/dataplat_test/data/%s/%s" % (pre,tdate_key,)
-        # if runenv == "prod":
-        #     wpath = "s3://hiretual-ml-data/dataplat/data/%s/%s" % (pre,tdate_key,)
-        # del_s3_folder(wpath, )
-        # df.to_parquet(wpath, )
+        tkey = "user_activity"
+        wbucket = "hiretual-ml-data-test"
+        pre = "dataplat_test/data/%s/%s" % (tkey,tdate_key,)
+        if runenv == "prod":
+            pre = "dataplat/data/%s/%s" % (tkey,tdate_key,)
+        wpath = "s3://%s/%s" % (wbucket,pre,)
+        del_s3_folder(wbucket,pre )
+        df.to_parquet(wpath, )
     
     
 
