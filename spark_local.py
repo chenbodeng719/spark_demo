@@ -3,11 +3,12 @@ from platform import java_ver
 import findspark,os
 # set hbase conf in spark_home/conf
 findspark.init("/home/chenbodeng/app/spark-3.1.2-bin-hadoop3.2")
+jar_str = ""
 jar_str = "/home/chenbodeng/myproj/spark_demo/jar/hadoop_jars/*.jar"
 jar_str = jar_str+",/home/chenbodeng/myproj/spark_demo/jar/aws_jars/*.jar"
 jar_str = jar_str+",/home/chenbodeng/myproj/spark_demo/jar/spark_jars/*.jar"
-jar_str = jar_str+",/home/chenbodeng/myproj/spark_demo/jar/hbase/*.jar"
-jar_str = jar_str+",/home/chenbodeng/myproj/spark_demo/jar/hbase-connectors/spark/hsconn/*.jar"
+# jar_str = jar_str+",/home/chenbodeng/myproj/spark_demo/jar/hbase/*.jar"
+# jar_str = jar_str+",/home/chenbodeng/myproj/spark_demo/jar/hbase-connectors/spark/hsconn/*.jar"
 findspark.add_jars(jar_str)
 findspark._add_to_submit_args("--conf spark.driver.extraClassPath=/home/chenbodeng/app/spark-3.1.2-bin-hadoop3.2")
 findspark._add_to_submit_args("--conf spark.executor.extraClassPath=/home/chenbodeng/app/spark-3.1.2-bin-hadoop3.2")
@@ -91,6 +92,23 @@ def myjob():
     final_df = sqlc.sql("select * from mycandidate where uid in ('0007c08d-c15b-49ed-9f76-e1473b40e391') ")
     final_df.show()
 
+def myjob_1():
+    sc = pyspark.SparkContext(appName="myjob",)
+    sqlc = SQLContext(sc)
+    data_source_format = 'org.apache.hadoop.hbase.spark'
+
+    tname = "candidate"
+    tmap = "uid STRING :key, col1 STRING f1:data"
+    df = sqlc.read.format(data_source_format) \
+        .option('hbase.table',tname) \
+        .option('hbase.columns.mapping', tmap) \
+        .option('hbase.spark.use.hbasecontext', False) \
+        .option("hbase.spark.pushdown.columnfilter", False) \
+        .load()
+    df.createOrReplaceTempView("mycandidate")
+    final_df = sqlc.sql("select * from mycandidate where uid in ('0007c08d-c15b-49ed-9f76-e1473b40e391') ")
+    final_df.show()
+
 
 def myjob_2():
     sc = pyspark.SparkContext(appName="myjob",)
@@ -133,6 +151,7 @@ def get_log():
 
 
 if __name__ == "__main__":
+    myjob_1()
     # myjob_2()
     # backlog_job()
-    get_log()
+    # get_log()
