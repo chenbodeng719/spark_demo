@@ -19,7 +19,7 @@ sc = pyspark.SparkContext.getOrCreate()
 sqlc = SQLContext(sc)
 
 class GenTable():
-    def __init__(self,runenv,start_date,start_time) -> None:
+    def __init__(self,runenv,start_time,start_date,) -> None:
         self.runenv = runenv
         self.start_date = start_date
         now_ts = get_ts8dtstr(start_time)
@@ -60,7 +60,8 @@ if __name__ == "__main__":
     parser.add_argument('--start_date',help='submit start_date', required=False)
     parser.add_argument('--runenv',help='submit runenv', required=False)
     args = parser.parse_args()
+    start_time = args.start_time
     start_date = args.start_date
     runenv = args.runenv
-    gt = GenTable(runenv,start_date)
+    gt = GenTable(runenv,start_time,start_date)
     gt.run()
