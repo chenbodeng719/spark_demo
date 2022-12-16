@@ -4,7 +4,7 @@ import pyspark
 from pyspark.sql import SQLContext, SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.functions import col, get_json_object, to_json, udf, flatten,explode
-from pyspark.sql.types import StringType
+from pyspark.sql.types import StringType,IntegerType
 
 sc = pyspark.SparkContext \
     .getOrCreate()
@@ -110,6 +110,9 @@ def filter_user_activity(df):
         "model_version",
         "timestamp"
     )
+
+    user_activity_df = user_activity_df.withColumn("fe_position", user_activity_df["fe_position"].cast(IntegerType()))
+    user_activity_df = user_activity_df.withColumn("ranking_position", user_activity_df["ranking_position"].cast(IntegerType()))
     return user_activity_df
 
 # path = "s3://htm-bi-data-test/bi-collection-v2/year=2022/month=11/day=29/"
