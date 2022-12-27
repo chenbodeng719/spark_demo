@@ -103,8 +103,6 @@ def merge_backlog(runenv):
     msg = "-------------wpath %s" % (wpath,)
     print("print: "+msg)
     finalDf.write.mode("overwrite").parquet(wpath)
-
-def hbase():
     
     
 
