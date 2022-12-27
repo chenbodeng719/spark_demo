@@ -18,7 +18,7 @@ from pyspark.sql.functions import col, from_json
 sc = pyspark.SparkContext.getOrCreate()
 sqlc = SQLContext(sc)
 
-class GenTable():
+class GenData():
     def __init__(self,runenv,start_time,start_date,) -> None:
         self.runenv = runenv
         self.start_date = start_date
@@ -36,9 +36,9 @@ class GenTable():
         cnt = int(diff_ts / 86400)
         for idx in range(cnt+1):
             tts = start_ts + idx*86400
-            self.gen_user_activity_table(runenv,tts,)
+            self.gen_user_activity_data(runenv,tts,)
 
-    def gen_user_activity_table(self,runenv,ts):
+    def gen_user_activity_data(self,runenv,ts):
         tpart = get_time_part_by_ts(ts)
         tdate_key = make_date_key(tpart)
         rpath = "s3://htm-bi-data-test/bi-collection-v2/%s" % (tdate_key,)
@@ -46,7 +46,7 @@ class GenTable():
             rpath = "s3://htm-bi-data-prod/bi-collection-v2/%s" % (tdate_key,)
         ret = path_exists(sc,rpath)
         if not ret:
-            print("[gen_user_activity_table]%s no exist" % (rpath,))
+            print("[gen_user_activity_data]%s no exist" % (rpath,))
             return
         df = sqlc.read.parquet(rpath)
         user_activity_df = filter_user_activity(df)
@@ -75,5 +75,6 @@ if __name__ == "__main__":
     start_date = args.start_date
     runenv = args.runenv
     print("start_time",start_time)
-    gt = GenTable(runenv,start_time,start_date)
-    gt.run()
+    print("start_date",start_date)
+    gd = GenData(runenv,start_time,start_date)
+    gd.run()

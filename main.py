@@ -5,6 +5,7 @@ import datetime,time
 from pyspark.sql import SQLContext
 import argparse
 from pyspark.sql import functions as F
+from pyspark.sql.functions import col, explode, get_json_object, udf
 import os
 from util import get_time_part_by_ts,make_date_key
 import json,logging
@@ -50,12 +51,28 @@ def test_spark_hbase(spark):
     df.show()
 
 
-def test_s3_parquet(spark):
+def test_hbase(spark):
+    spark = SparkSession.builder.appName("test_hbase").getOrCreate()
     sc = spark.sparkContext
     sqlc = SQLContext(sc)
-    path = "s3a://htm-bi-data-test/bi-collection-v2/year=2022/month=11/day=15/"
-    df = sqlc.read.parquet(path)
-    df.filter(df.event_name == "ai_sourcing_task" ).show()
+    data_source_format = 'org.apache.hadoop.hbase.spark'
+    tname = "candidate"
+    tmap = "uid STRING :key, oridata STRING f1:data"
+    df = sqlc.read.format(data_source_format) \
+        .option('hbase.table',tname) \
+        .option('hbase.columns.mapping', tmap) \
+        .option('hbase.spark.use.hbasecontext', False) \
+        .option("hbase.spark.pushdown.columnfilter", False) \
+        .load()
+    final_df = df \
+    .withColumn("position_title",get_json_object(col("oridata"), "$.basic.current_position.position_title") ) \
+    .filter(col("position_title") == "Business Consultant") \
+    .select(
+        "uid",
+        "position_title",
+        "oridata",
+    )
+    final_df.show()
 
 def merge_backlog(runenv):
     spark = SparkSession.builder.appName("merge_backlog").getOrCreate()
@@ -86,6 +103,9 @@ def merge_backlog(runenv):
     msg = "-------------wpath %s" % (wpath,)
     print("print: "+msg)
     finalDf.write.mode("overwrite").parquet(wpath)
+
+def hbase():
+    
     
 
 
@@ -99,9 +119,8 @@ if __name__ == "__main__":
     if cate == "spark_hbase":
         spark = SparkSession.builder.appName("spark_hbase").getOrCreate()
         test_spark_hbase(spark)
-    elif cate == "s3_parquet":
-        spark = SparkSession.builder.appName("spark_hbase_job").getOrCreate()
-        test_s3_parquet(spark)
+    elif cate == "test_hbase":
+        test_hbase()
     elif cate == "merge_backlog":
         merge_backlog(args.runenv)
     else:

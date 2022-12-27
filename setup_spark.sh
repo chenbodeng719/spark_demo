@@ -1,12 +1,10 @@
 #!/bin/bash
 # sudo su
-sudo aws s3 cp s3://htm-test/chenbodeng/mytest/hsconn.zip /home/hadoop/
-sudo aws s3 cp s3://htm-test/chenbodeng/mytest/hbase_jar.zip /home/hadoop/
-sudo aws s3 cp s3://htm-test/chenbodeng/mytest/hbase-site.xml /home/hadoop/
-# aws s3 cp s3://htm-test/chenbodeng/mytest/hadoop_jars.zip ./
-# sudo aws s3 cp s3://htm-test/chenbodeng/mytest/spark_jars.zip /home/hadoop/
+sudo aws s3 cp s3://hiretual-ml-data-test/cbd/emr_tool/hsconn.zip /home/hadoop/
+sudo aws s3 cp s3://hiretual-ml-data-test/cbd/emr_tool/hbase_jar.zip /home/hadoop/
+sudo aws s3 cp s3://hiretual-ml-data-test/cbd/emr_tool/hbase-site.xml /usr/lib/spark/conf/
+# aws s3 cp hsconn.zip s3://hiretual-ml-data-test/cbd/emr_tool/
+# aws s3 cp hbase_jar.zip s3://hiretual-ml-data-test/cbd/emr_tool/
 cd /home/hadoop
 sudo unzip hsconn.zip
 sudo unzip hbase_jar.zip
-
-sudo pip3 install boto3
