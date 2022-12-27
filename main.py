@@ -51,7 +51,7 @@ def test_spark_hbase(spark):
     df.show()
 
 
-def test_hbase(spark):
+def test_hbase():
     spark = SparkSession.builder.appName("test_hbase").getOrCreate()
     sc = spark.sparkContext
     sqlc = SQLContext(sc)
