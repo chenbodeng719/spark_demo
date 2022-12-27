@@ -9,4 +9,4 @@ cd /home/emr_tool
 sudo unzip hsconn.zip
 sudo unzip hbase_jar.zip
 
-# sudo pip3 install boto3 scikit-learn
+sudo pip3 install boto3 scikit-learn
