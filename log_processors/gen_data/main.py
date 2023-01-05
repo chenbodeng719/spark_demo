@@ -50,16 +50,17 @@ class GenData():
             return
         df = sqlc.read.parquet(rpath)
         user_activity_df = filter_user_activity(df)
-        user_activity_df.show()
         tkey = "user_activity"
         wbucket = "hiretual-ml-data-test"
         pre = "dataplat_test/data/%s/%s" % (tkey,tdate_key,)
         if runenv == "prod":
+            wbucket = "hiretual-ml-data"
             pre = "dataplat/data/%s/%s" % (tkey,tdate_key,)
         wpath = "s3://%s/%s" % (wbucket,pre,)
-        del_s3_folder(wbucket,pre )
         print("rpath",rpath)
         print("wpath",wpath)
+        user_activity_df.show()
+        del_s3_folder(wbucket,pre )
         user_activity_df.write.parquet(wpath)
     
     
