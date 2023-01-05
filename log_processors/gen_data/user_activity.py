@@ -58,6 +58,8 @@ def action_page_udf(module, event_name):
         return "candidate_list"
     elif module.endswith("talent_profile"):
         return "talent_profile"
+    elif module.endswith("talent-profile"):
+        return "talent_profile"
     elif module.endswith("candidate-list"):
         return "candidate_list"
     elif event_name == "bulk_move":
@@ -125,8 +127,6 @@ def filter_user_activity(df):
     ).withColumn(
         "recall_source", set_recall_source(get_json_object(col("candidate.candidate_rank_info"), "$.recallSource"))
     ).withColumn(
-        "search_version", get_json_object(col("candidate.candidate_rank_info"), "$.searchVersion")
-    ).withColumn(
         "action", action_udf(col("inner_text"), col("event_name"), col("type"))
     ).withColumn(
         "action_page", action_page_udf(col("module"), col("event_name"))
@@ -135,12 +135,10 @@ def filter_user_activity(df):
     ).withColumn(
         "project_id", get_project_id(col("payload.project.project_id"), col("url"))
     ).filter(
-        col("action").isNotNull() &
-        col("page_category").isNotNull() &
-        col("action_page").isNotNull()
+        (col("action").isNotNull() & col("page_category").isNotNull() & col("action_page").isNotNull())
     ).select(
         col("payload.sourcing.sourcing_search_id").alias("search_id"),
-        col("client").alias("team_id"),
+        col("team_id"),
         "project_id",
         "user_id",
         "event_id",
@@ -151,14 +149,18 @@ def filter_user_activity(df):
         "action_page",
         "page_category",
         "model_version",
-        "search_version",
         "recall_source",
         col("model_version").alias("experiment_type"),
         "timestamp",
     )
-
     user_activity_df = user_activity_df.withColumn("fe_position", user_activity_df["fe_position"].cast(IntegerType()))
     user_activity_df = user_activity_df.withColumn("ranking_position", user_activity_df["ranking_position"].cast(IntegerType()))
+    
+    search_version = df.filter(col("event_name") == "ai_sourcing_task"
+                    ).select(col("payload.sourcing.sourcing_from").alias("search_version"),
+                            col("payload.sourcing.sourcing_search_id").alias("search_id")
+                    )
+    user_activity_df = user_activity_df.join(search_version, on=["search_id"], how='left')
     return user_activity_df
 
 
