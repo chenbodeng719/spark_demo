@@ -32,7 +32,6 @@ def get_parquet_from_s3():
                             col("user_id"),
                             col("payload.sourcing.sourcing_search_id"),
                             col("payload"),
-                            col("rank_info.searchSample").alias("position"),
                             "action"
                             )
     df.show()
