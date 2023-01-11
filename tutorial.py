@@ -24,7 +24,6 @@ def get_parquet_from_s3():
                       (df.url.like("%search-result") &
                       (df.type == "click"))
                     ).withColumn("candidate_records", explode("payload.candidate_records")
-                    ).withColumn("rank_info", from_json("candidate_records.candidate_rank_info", rank_info_schema)
                     ).withColumn("action", when(df.event_name == "external_link_linkedin", "click_linkedin")
                                            .when(df.event_name == "candidate_name", "click_candidate_name")
                                            .when(df.event_name == "reveal_contact_info", "click_contact_info")
