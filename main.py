@@ -104,11 +104,15 @@ def test_hbase_mget():
     data_source_format = 'org.apache.hadoop.hbase.spark'
     tname = "candidate"
     tmap = "uid STRING :key, oridata STRING f1:data"
+    tlist = ["fcon_59124a3873d8f0.85770051", "tiq_58d1937c3a8550.54523267", "impt_5b53011b7d6a83.61364387", "impt_5b5b93e4c66628.23200830", "fu592c680b53c8f5.48096564", "fu589264bb564313.87757324", "fu589b42474b6013.97777442", "fu58aae034c0af85.13465164", "fu588b70d713aef5.64979322", "impt_5b695d2eeccb03.71995693"]
+    tlist.sort()
     df = sqlc.read.format(data_source_format) \
         .option('hbase.table',tname) \
         .option('hbase.columns.mapping', tmap) \
         .option('hbase.spark.use.hbasecontext', False) \
         .option("hbase.spark.pushdown.columnfilter", False) \
+        .option("hbase.table.startKey", tlist[0]) \
+        .option("hbase.table.endKey", tlist[-1]) \
         .load()
     # df = df \
     # .withColumn("position_title",get_json_object(col("oridata"), "$.basic.current_position.position_title") ) \
@@ -117,8 +121,9 @@ def test_hbase_mget():
     #     "uid",
     #     "position_title",
     #     "oridata",
-    # )
-    tlist = ["fcon_59124a3873d8f0.85770051", "tiq_58d1937c3a8550.54523267", "impt_5b53011b7d6a83.61364387", "impt_5b5b93e4c66628.23200830", "fu592c680b53c8f5.48096564", "fu589264bb564313.87757324", "fu589b42474b6013.97777442", "fu58aae034c0af85.13465164", "fu588b70d713aef5.64979322", "impt_5b695d2eeccb03.71995693"]
+    # )# vowels list
+
+    # sort the vowels
 #     .filter(col("position_title") == "Business Consultant") \
     df = df \
     .filter(df.uid.isin(tlist)) \
