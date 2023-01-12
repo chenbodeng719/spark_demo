@@ -39,5 +39,9 @@ def get_parquet_from_s3():
 
 if __name__ == "__main__":
     df = get_parquet_from_s3()
-    wpath = "s3://hiretual-ml-data-test/data/chenbodeng/tutorial"
+    wbucket = "hiretual-ml-data-test"
+    pre = "data/chenbodeng/tutorial"
+    wpath = "s3://%s/%s" % (wbucket,pre)
+    from util import del_s3_folder
+    del_s3_folder(wbucket,pre )
     df.write.parquet(wpath)
