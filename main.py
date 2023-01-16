@@ -134,6 +134,37 @@ def test_hbase_mget():
     df.show()
 
 
+def test_hbase_mget_v2():
+    spark = SparkSession.builder.appName("test_hbase_mget").getOrCreate()
+    sc = spark.sparkContext
+    sqlc = SQLContext(sc)
+
+
+    path = "s3://hiretual-ml-data-test/dataplat_test/data/user_activity/year=2022/month=12/day=24"    
+    user_activity = sqlc.read.parquet(path)
+    user_activity.show()
+    
+    
+    data_source_format = 'org.apache.hadoop.hbase.spark'
+    tname = "candidate"
+    tmap = "uid STRING :key, oridata STRING f1:data"
+    candidate = sqlc.read.format(data_source_format) \
+        .option('hbase.table',tname) \
+        .option('hbase.columns.mapping', tmap) \
+        .option('hbase.spark.use.hbasecontext', False) \
+        .option("hbase.spark.pushdown.columnfilter", False) \
+        .load()
+    candidate.show()
+    
+    user_activity = user_activity.drop_duplicates(subset=["candidate_id"])
+    user_activity = user_activity.alias('user_activity')
+    candidate = candidate.alias('candidate')
+    
+    final_df = user_activity.join(candidate,user_activity.candidate_id ==  candidate.uid ,"inner") \
+    .select('user_activity.search_id','user_activity.candidate_id','candidate.oridata') 
+    final_df.show()
+
+
 def merge_backlog(runenv):
     spark = SparkSession.builder.appName("merge_backlog").getOrCreate()
     sc = spark.sparkContext
@@ -181,6 +212,8 @@ if __name__ == "__main__":
         test_hbase_count()
     elif cate == "test_hbase_mget":
         test_hbase_mget()
+    elif cate == "test_hbase_mget_v2":
+        test_hbase_mget_v2()
     elif cate == "test_hbase":
         test_hbase()
     elif cate == "merge_backlog":
