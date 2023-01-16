@@ -38,12 +38,14 @@ wget https://repo1.maven.org/maven2/org/apache/hive/hive-hbase-handler/3.1.2/hiv
 - hbase
 ```
 create 'mytable','f1'
+create 'candidate_test','f1'
 put 'mytable', 'row1', 'f1:name', 'Gokhan'
 put 'mytable', 'row2', 'f1:name', 'test'
 put 'mytable', 'test3', 'f1:name', 'test3'
 put 'mytable', 'test4', 'f1:name', 'test3'
 scan 'mytable'
 scan 'candidate', {'LIMIT' => 5}
+scan 'candidate_test', {  LIMIT => 10 }
 major_compact 'candidate'
 ```
 
