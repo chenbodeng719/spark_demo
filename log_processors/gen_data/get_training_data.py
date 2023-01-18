@@ -1,5 +1,5 @@
 import sys
-import sys
+from typing import List, Text
 
 import pyspark
 from pyspark import SparkConf, SparkContext
@@ -10,9 +10,6 @@ from pyspark.sql.functions import (col, explode, from_json, get_json_object,
 from pyspark.sql.types import IntegerType, StringType
 
 from .user_activity import filter_user_activity
-
-from typing import List, Text
-
 
 
 @udf(returnType=StringType())
@@ -129,5 +126,37 @@ class TrainingDataGenerator:
                                         on=['candidate_id'],
                                         how='right')
         return training_data
+
+
+if __name__ == "__main__":
+    sc = pyspark.SparkContext \
+        .getOrCreate()
+
+    sc.addPyFile("s3://htm-test/chenbodeng/mytest/spark_demo/util.py")
+    sc.addPyFile("s3://htm-test/chenbodeng/mytest/spark_demo/utils.py")
+
+    sqlc = SQLContext(sc)
+
+    from pyspark.sql.functions import col
+
+    from util import path_exists
+
+
+    def get_parquet_from_s3():
+        path = "s3://htm-bi-data-test/bi-collection-v2/year=2023/month=01"
+        ret = path_exists(sc,path)
+        if ret:
+            df = sqlc.read.parquet(path)
+            return df
+        else:
+            print("path no exist")
+
+    parquet = get_parquet_from_s3()
+    generator = TrainingDataGenerator()
+    ans = generator.run(parquet=parquet)
+    ans.show(10)
+
+
+
 
 
