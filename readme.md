@@ -18,9 +18,12 @@ python -u main.py --cate spark_hbase_local
 - common
 ```
 aws s3 cp main.py s3://htm-test/chenbodeng/mytest/
+aws s3 cp hive-site.xml s3://htm-test/chenbodeng/mytest/
+aws s3 cp  s3://htm-test/chenbodeng/mytest/hive-site.xml ./
 aws s3 cp util.py s3://htm-test/chenbodeng/mytest/spark_demo/
-aws s3 cp setup_spark.sh s3://htm-test/chenbodeng/mytest/
+aws s3 cp setup.sh s3://htm-test/chenbodeng/mytest/setup_spark.sh
 aws s3 cp s3://htm-test/chenbodeng/mytest/hsconn.zip ./
+aws s3 cp ./main.py s3://htm-test/chenbodeng/mytest/main.py
 
 aws s3 rm s3://htm-test/chenbodeng/hbase/ --recursive
 
@@ -56,6 +59,16 @@ major_compact 'candidate'
 CREATE EXTERNAL TABLE myhivetable (rowkey STRING, name STRING) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
 WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,f1:name')
 TBLPROPERTIES ('hbase.table.name' = 'mytable');	
+
+
+set hbase.zookeeper.quorum=ec2-13-57-210-54.us-west-1.compute.amazonaws.com;
+
+
+CREATE EXTERNAL TABLE hive_candidate (uid STRING, oridata STRING) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
+WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,f1:data')
+TBLPROPERTIES ('hbase.table.name' = 'candidate');	
+
+
 
 CREATE TABLE IF NOT EXISTS myhivetable_out
 STORED AS PARQUET

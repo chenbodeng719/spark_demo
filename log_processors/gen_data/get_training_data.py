@@ -9,7 +9,7 @@ from pyspark.sql.functions import (col, explode, from_json, get_json_object,
                                    lit, lower, regexp_replace, udf, when)
 from pyspark.sql.types import IntegerType, StringType
 
-from .user_activity import filter_user_activity
+from log_processors.gen_data.user_activity import filter_user_activity
 
 
 @udf(returnType=StringType())
