@@ -99,7 +99,7 @@ class TrainingDataGenerator:
 
     def get_data_from_hbase(self, candidate_list: List[Text]):
         data_source_format = 'org.apache.hadoop.hbase.spark'
-        tname = "candidate_test"
+        tname = "candidate"
         tmap = "uid STRING :key, oridata STRING f1:data"
 
         df = self.sqlc.read.format(data_source_format) \
@@ -127,7 +127,7 @@ class TrainingDataGenerator:
         profile_df = self.get_data_from_hbase(ids)
         training_data = training_labels.join(profile_df,
                                         on=['candidate_id'],
-                                        how='left')
+                                        how='right')
         return training_data
 
 
