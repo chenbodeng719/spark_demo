@@ -52,14 +52,12 @@ class TrainingDataGenerator:
                                             "candidate_id").distinct().withColumn(
                                                 "impressed", lit(True))
 
-        good_fit_candidates = df.filter((col("action").like("%good_fit")) &
-                                        (col("candidate_id").isNotNull())).select(
+        good_fit_candidates = df.filter((col("action").like("%good_fit"))).select(
                                             "search_id", "user_id",
                                             "candidate_id").distinct().withColumn(
                                                 "is_good_fit", lit(True))
 
-        not_fit = df.filter((col("action").like("%not_a_fit")) &
-                            (col("candidate_id").isNotNull())).select(
+        not_fit = df.filter((col("action").like("%not_a_fit"))).select(
                                 "search_id", "user_id",
                                 "candidate_id").distinct().withColumn(
                                     "is_good_fit", lit(False))
