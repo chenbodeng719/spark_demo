@@ -2,15 +2,13 @@ import sys
 from typing import List, Text
 
 import pyspark
-from pyspark import SparkConf, SparkContext
-from pyspark.sql import SparkSession, SQLContext
-from pyspark.sql import functions as F
-from pyspark.sql.functions import (col, explode, from_json, get_json_object,
-                                   lit, lower, regexp_replace, udf, when)
+from pyspark.sql import SQLContext
+from pyspark.sql.functions import (col, get_json_object,
+                                   lit, udf)
 from pyspark.sql.types import IntegerType, StringType
 
 from log_processors.gen_data.user_activity import filter_user_activity
-
+from log_processors.gen_data.schema import EVENT_TRACKING_SCHEMA
 
 @udf(returnType=StringType())
 def partition_by_last(candidate_id):
@@ -144,7 +142,10 @@ if __name__ == "__main__":
         path = "s3://htm-bi-data-test/bi-collection-v2/year=2023/month=01"
         ret = path_exists(sc,path)
         if ret:
-            df = sqlc.read.parquet(path)
+            df = sqlc.read.schema(EVENT_TRACKING_SCHEMA
+                         ).option("mergeSchema", "false"
+                         ).option("filterPushdown", "true"
+                         ).parquet(path)
             return df
         else:
             print("path no exist")
