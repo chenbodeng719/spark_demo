@@ -17,6 +17,9 @@ EVENT_TRACKING_SCHEMA = StructType([
             StructField("sourcing", StructType([
                 StructField("sourcing_search_id", StringType()),
                 StructField("sourcing_from", StringType()),
+                StructField("sourcing_filters", StructType([
+                    StructField("member0", StringType()),
+                ]))
             ])),
         ])
     ),
@@ -30,3 +33,5 @@ EVENT_TRACKING_SCHEMA = StructType([
     StructField("url", StringType()),
     StructField("timestamp", IntegerType())
 ])
+
+
