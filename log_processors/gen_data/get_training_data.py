@@ -113,7 +113,7 @@ class TrainingDataGenerator:
 
         return df
 
-    def get_ai_sourcing_task(parquet):
+    def get_ai_sourcing_task(self, parquet):
         return parquet.filter(parquet.event_name == 'ai_sourcing_task'
         ).withColumn("sourcing",
                      col("payload.sourcing")
@@ -161,8 +161,8 @@ if __name__ == "__main__":
     parquet = get_parquet_from_s3()
     generator = TrainingDataGenerator()
     training_profiles = generator.run(parquet=parquet)
-    training_searches = generator.get_ai_sourcing_task(parquet=parquet)
     training_profiles.show(10)
+    training_searches = generator.get_ai_sourcing_task(parquet=parquet)
     training_searches.show(10)
 
 
