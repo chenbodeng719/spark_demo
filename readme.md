@@ -65,12 +65,14 @@ SELECT distinct ua.candidate_id FROM user_activity_tbl_hive ua where ua.`timesta
 
 SELECT distinct (ua.candidate_id),ch.oridata FROM user_activity_tbl_hive ua join candidate_hive ch on ua.candidate_id = ch.uid where ua.`timestamp` >= 1669824000 and ua.`timestamp` <= 1669910400  
 
-set hbase.zookeeper.quorum=ec2-13-57-210-54.us-west-1.compute.amazonaws.com;
+set hbase.zookeeper.quorum=ec2-54-219-193-183.us-west-1.compute.amazonaws.com;
 
 
 CREATE EXTERNAL TABLE hive_candidate (uid STRING, oridata STRING) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
 WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,f1:data')
 TBLPROPERTIES ('hbase.table.name' = 'candidate');	
+
+select * from hive_candidate limit 3;
 
 
 sudo -u hdfs hadoop fs -mkdir /user/jovyan

@@ -9,6 +9,7 @@ from pyspark.sql.functions import col, explode, get_json_object, udf
 import os
 # from util import get_time_part_by_ts,make_date_key
 import json,logging
+from util import path_exists,make_date_key,get_dtstr_by_ts,get_ts8dtstr,get_time_part_by_ts,del_s3_folder
 
 
 def test_spark_hbase(spark):
@@ -74,8 +75,9 @@ def test_hbase():
     )
     final_df.show()
 
-def test_hbase_count():
-    spark = SparkSession.builder.appName("test_hbase").getOrCreate()
+
+def test_hbase_load():
+    spark = SparkSession.builder.appName("test_hbase_load").getOrCreate()
     sc = spark.sparkContext
     sqlc = SQLContext(sc)
     data_source_format = 'org.apache.hadoop.hbase.spark'
@@ -87,51 +89,11 @@ def test_hbase_count():
         .option('hbase.spark.use.hbasecontext', False) \
         .option("hbase.spark.pushdown.columnfilter", False) \
         .load()
-    # df = df \
-    # .withColumn("position_title",get_json_object(col("oridata"), "$.basic.current_position.position_title") ) \
-    # .filter(col("position_title") == "Business Consultant") \
-    # .select(
-    #     "uid",
-    #     "position_title",
-    #     "oridata",
-    # )
-    print(df.count())
-
-def test_hbase_mget():
-    spark = SparkSession.builder.appName("test_hbase_mget").getOrCreate()
-    sc = spark.sparkContext
-    sqlc = SQLContext(sc)
-    data_source_format = 'org.apache.hadoop.hbase.spark'
-    tname = "candidate"
-    tmap = "uid STRING :key, oridata STRING f1:data"
-    tlist = ["fcon_59124a3873d8f0.85770051", "tiq_58d1937c3a8550.54523267", "impt_5b53011b7d6a83.61364387", "impt_5b5b93e4c66628.23200830", "fu592c680b53c8f5.48096564", "fu589264bb564313.87757324", "fu589b42474b6013.97777442", "fu58aae034c0af85.13465164", "fu588b70d713aef5.64979322", "impt_5b695d2eeccb03.71995693"]
-    df = sqlc.read.format(data_source_format) \
-        .option('hbase.table',tname) \
-        .option('hbase.columns.mapping', tmap) \
-        .option('hbase.spark.use.hbasecontext', False) \
-        .option("hbase.spark.pushdown.columnfilter", False) \
-        .load()
-    # df = df \
-    # .withColumn("position_title",get_json_object(col("oridata"), "$.basic.current_position.position_title") ) \
-    # .filter(col("position_title") == "Business Consultant") \
-    # .select(
-    #     "uid",
-    #     "position_title",
-    #     "oridata",
-    # )# vowels list
-
-    # sort the vowels
-#     .filter(col("position_title") == "Business Consultant") \
-    df = df \
-    .filter(df.uid.isin(tlist)) \
-    .withColumn("position_title",get_json_object(col("oridata"), "$.basic.current_position.position_title") ) \
-    .select(
-        "uid",
-        "position_title",
-        "oridata",
-    )
-                  
     df.show()
+    wbucket = "hiretual-ml-data-test"
+    wpath = "s3a://%s/%s/%s" % (wbucket,"dataplat_test/data","all_profile",)
+    del_s3_folder(wpath)
+    df.write.mode("overwrite").parquet(wpath)
 
 
 def test_hbase_mget_v2():
@@ -208,10 +170,8 @@ if __name__ == "__main__":
     # if cate == "spark_hbase":
     #     spark = SparkSession.builder.appName("spark_hbase").getOrCreate()
     #     test_spark_hbase(spark)
-    if cate == "test_hbase_count":
-        test_hbase_count()
-    elif cate == "test_hbase_mget":
-        test_hbase_mget()
+    if cate == "test_hbase_load":
+        test_hbase_load()
     elif cate == "test_hbase_mget_v2":
         test_hbase_mget_v2()
     elif cate == "test_hbase":
