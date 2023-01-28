@@ -60,6 +60,10 @@ CREATE EXTERNAL TABLE myhivetable (rowkey STRING, name STRING) STORED BY 'org.ap
 WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,f1:name')
 TBLPROPERTIES ('hbase.table.name' = 'mytable');	
 
+SELECT distinct ua.candidate_id FROM user_activity_tbl_hive ua where ua.`timestamp` >= 1669824000 and ua.`timestamp` <= 1669910400
+
+
+SELECT distinct (ua.candidate_id),ch.oridata FROM user_activity_tbl_hive ua join candidate_hive ch on ua.candidate_id = ch.uid where ua.`timestamp` >= 1669824000 and ua.`timestamp` <= 1669910400  
 
 set hbase.zookeeper.quorum=ec2-13-57-210-54.us-west-1.compute.amazonaws.com;
 
@@ -68,6 +72,9 @@ CREATE EXTERNAL TABLE hive_candidate (uid STRING, oridata STRING) STORED BY 'org
 WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,f1:data')
 TBLPROPERTIES ('hbase.table.name' = 'candidate');	
 
+
+sudo -u hdfs hadoop fs -mkdir /user/jovyan
+sudo -u hdfs hadoop fs -chown jovyan /user/jovyan
 
 
 CREATE TABLE IF NOT EXISTS myhivetable_out
@@ -89,4 +96,10 @@ aws s3 cp s3://htm-test/chenbodeng/mytest/hive-site.xml ./
 INSERT INTO TABLE myhivetable VALUES ('test','test');
 
 
+```
+
+- jupyterhub
+```
+docker exec jupyterhub useradd -m -s /bin/bash -N kuangzhengli
+docker exec jupyterhub bash -c "echo kuangzhengli:kuangzhengli | chpasswd"
 ```

@@ -1,6 +1,5 @@
 #!/bin/bash
 # sudo su
-export PYTHONPATH=.:$PYTHONPATH
 sudo aws s3 cp s3://htm-test/chenbodeng/mytest/hsconn.zip /home/emr_tool/
 sudo aws s3 cp s3://htm-test/chenbodeng/mytest/hbase_jar.zip /home/emr_tool/
 # sudo aws s3 cp s3://htm-test/chenbodeng/mytest/hbase-site.xml /home/emr_tool/
