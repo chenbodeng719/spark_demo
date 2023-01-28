@@ -91,9 +91,11 @@ def test_hbase_load():
         .load()
     df.show()
     wbucket = "hiretual-ml-data-test"
-    wpath = "s3a://%s/%s/%s" % (wbucket,"dataplat_test/data","all_profile",)
-    del_s3_folder(wpath)
-    df.write.mode("overwrite").parquet(wpath)
+    pre = "%s/%s" % ("dataplat_test/data","all_profile",)
+    wpath = "s3://%s/%s" % (wbucket,pre,)
+    print(wpath)
+    del_s3_folder(wbucket,pre )
+    df.write.parquet(wpath)
 
 
 def test_hbase_mget_v2():
