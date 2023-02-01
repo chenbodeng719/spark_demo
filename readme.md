@@ -18,6 +18,7 @@ python -u main.py --cate spark_hbase_local
 - common
 ```
 aws s3 cp main.py s3://htm-test/chenbodeng/mytest/
+aws s3 cp schema.py s3://htm-test/chenbodeng/mytest/
 aws s3 cp hive-site.xml s3://htm-test/chenbodeng/mytest/
 aws s3 cp  s3://htm-test/chenbodeng/mytest/hive-site.xml ./
 aws s3 cp util.py s3://htm-test/chenbodeng/mytest/spark_demo/

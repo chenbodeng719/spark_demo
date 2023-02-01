@@ -10,14 +10,7 @@ from util import path_exists,make_date_key,get_dtstr_by_ts,get_ts8dtstr,get_time
 from log_processors.gen_data.user_activity import filter_user_activity
 from log_processors.gen_data.schema import EVENT_TRACKING_SCHEMA
 
-import pyspark
-from pyspark.sql import SQLContext, SparkSession
-from pyspark.sql import functions as F
-from pyspark.sql.functions import explode, when, lower, regexp_replace
-from pyspark.sql.functions import col, from_json
 
-sc = pyspark.SparkContext.getOrCreate()
-sqlc = SQLContext(sc)
 
 class GenData():
     def __init__(self,runenv,start_time,start_date,) -> None:
