@@ -25,7 +25,7 @@ aws s3 cp setup.sh s3://htm-test/chenbodeng/mytest/setup_spark.sh
 aws s3 cp s3://htm-test/chenbodeng/mytest/hsconn.zip ./
 aws s3 cp ./main.py s3://htm-test/chenbodeng/mytest/main.py
 
-aws s3 rm s3://htm-test/chenbodeng/hbase/ --recursive
+aws s3 rm s3://htm-test/chenbodeng/hbase_fuck/ --recursive
 
 
 zip -r spark_demo.zip spark_demo -x spark_demo/jar/\* spark_demo/.git/\*
@@ -56,47 +56,43 @@ major_compact 'candidate'
 
 
 ```
-CREATE EXTERNAL TABLE myhivetable (rowkey STRING, name STRING) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
-WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,f1:name')
-TBLPROPERTIES ('hbase.table.name' = 'mytable');	
+
 
 SELECT distinct ua.candidate_id FROM user_activity_tbl_hive ua where ua.`timestamp` >= 1669824000 and ua.`timestamp` <= 1669910400
 
 
-SELECT distinct (ua.candidate_id),ch.oridata FROM user_activity_tbl_hive ua join candidate_hive ch on ua.candidate_id = ch.uid where ua.`timestamp` >= 1669824000 and ua.`timestamp` <= 1669910400  
+SELECT distinct (ua.candidate_id),ch.oridata FROM user_activity_tbl_hive ua join hive_candidate ch on ua.candidate_id = ch.uid where ua.`timestamp` >= 1669824000 and ua.`timestamp` <= 1669910400  
 
-set hbase.zookeeper.quorum=ec2-54-219-193-183.us-west-1.compute.amazonaws.com;
+SELECT ua.candidate_id,ch.oridata FROM user_activity_tbl_hive ua LEFT OUTER JOIN hive_candidate ch on ua.candidate_id = ch.uid
+
+set hbase.zookeeper.quorum=ec2-18-144-4-89.us-west-1.compute.amazonaws.com;
 
 
 CREATE EXTERNAL TABLE hive_candidate (uid STRING, oridata STRING) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
 WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,f1:data')
 TBLPROPERTIES ('hbase.table.name' = 'candidate');	
 
+CREATE EXTERNAL TABLE hive_candidate_test (uid STRING, oridata STRING) STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler' 
+WITH SERDEPROPERTIES ('hbase.columns.mapping' = ':key,f1:data')
+TBLPROPERTIES ('hbase.table.name' = 'candidate_test');	
+
 select * from hive_candidate limit 3;
 
+INSERT OVERWRITE TABLE all_profile SELECT uid,oridata from hive_candidate
+INSERT OVERWRITE TABLE all_profile SELECT uid,oridata from hive_candidate_test
+
+
+aws s3 rm s3://hiretual-ml-data-test/dataplat_test/data/all_profile_hive --recursive
 
 sudo -u hdfs hadoop fs -mkdir /user/jovyan
 sudo -u hdfs hadoop fs -chown jovyan /user/jovyan
+a
+sudo -u hdfs hadoop fs -mkdir /user/emr-notebook
+sudo -u hdfs hadoop fs -chown emr-notebook /user/emr-notebook
 
 
-CREATE TABLE IF NOT EXISTS myhivetable_out
-STORED AS PARQUET
-AS 
-SELECT * FROM myhivetable limit 2
 
-CREATE EXTERNAL TABLE parquet_hive (
-  foo string
-) STORED AS PARQUET
-LOCATION 's3://htm-test/chenbodeng/mytest/parquet_hive';
-
-INSERT INTO parquet_hive SELECT name FROM myhivetable;
-
-
-aws s3 cp s3://htm-test/chenbodeng/mytest/hive-site.xml ./
-
-
-INSERT INTO TABLE myhivetable VALUES ('test','test');
-
+aws s3 ls s3://hiretual-ml-data-test/dataplat_test/data/all_profile
 
 ```
 
