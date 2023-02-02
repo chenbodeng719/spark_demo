@@ -5,7 +5,7 @@ from pyspark.sql.functions import explode, when, lower, regexp_replace
 from pyspark.sql.functions import col, from_json
 
 
-from pyspark.sql.functions import col,get_json_object, from_json, to_json, udf,lit
+from pyspark.sql.functions import col,get_json_object, from_json, to_json,avg, udf,lit
 from pyspark.sql.types import StringType,IntegerType,FloatType
 
 
@@ -29,8 +29,10 @@ def get_metrics(df):
     df = df.filter(
         col("search_id").isNotNull()
     )
+    total_cnt = df.groupBy("search_id").count().count()
 #     valid
     valid_df = get_valid_df(df)
+    valid_count = valid_df.count()
     
     df = valid_df.alias("tbl1").join(
         df.alias("tbl2"),valid_df.search_id == df.search_id,"inner"
@@ -74,8 +76,31 @@ def get_metrics(df):
         gf_cnt_valid(col("gf_cnt"))
     )
     final_df = final_df.na.fill(value=0,subset=["gf25_cnt","gf50_cnt","gf_cnt","gf25_cnt_ratio","gf50_cnt_ratio"])
+    
+#     calculate basic metrics
+    gf_ratio = final_df.filter(
+        final_df["gf_cnt_valid"] > 0
+    ).count() / valid_count
+    gf25_ratio = final_df.filter(
+        final_df["gf25_cnt_valid"] > 0
+    ).count() / valid_count
+    gf50_ratio = final_df.filter(
+        final_df["gf50_cnt_valid"] > 0
+    ).count() / valid_count
+    gf25_avg_ratio = final_df.agg(avg(col("gf25_cnt_ratio"))).collect()[0][0]
+    gf50_avg_ratio = final_df.agg(avg(col("gf50_cnt_ratio"))).collect()[0][0]
+    
+    metrics = {
+        "search_total_cnt":total_cnt,
+        "search_valid_cnt":valid_count,
+        "gf_ratio":gf_ratio,
+        "gf25_ratio":gf25_ratio,
+        "gf50_ratio":gf50_ratio,
+        "gf25_avg_ratio":gf25_avg_ratio,
+        "gf50_avg_ratio":gf50_avg_ratio,
+    }
     final_df.show()
-    print(final_df.count())
+    print(metrics)
     return final_df
 
 #     spark.sql("select * from EMP e, DEPT d, ADD a " + \
