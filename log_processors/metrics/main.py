@@ -24,7 +24,7 @@ class MLMetrics():
     
     def run(self,cate = ""):
         start_ts = get_ts8dtstr(self.start_date+" 00:00:00")
-        end_ts = get_ts8dtstr(self.end_date+" 00:00:00") + 86400
+        end_ts = get_ts8dtstr(self.end_date+" 00:00:00")
         diff_ts = end_ts - start_ts
         if diff_ts < 0:
             raise Exception("start_date is later than end_date.")
