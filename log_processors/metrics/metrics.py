@@ -87,8 +87,8 @@ def get_metrics(df):
     gf50_ratio = final_df.filter(
         final_df["gf50_cnt_valid"] > 0
     ).count() / valid_count
-    gf25_avg_ratio = final_df.agg(avg(col("gf25_cnt_ratio"))).collect()[0][0]
-    gf50_avg_ratio = final_df.agg(avg(col("gf50_cnt_ratio"))).collect()[0][0]
+    gf25_cnt_ratio_avg = final_df.agg(avg(col("gf25_cnt_ratio"))).collect()[0][0]
+    gf50_cnt_ratio_avg = final_df.agg(avg(col("gf50_cnt_ratio"))).collect()[0][0]
     
     metrics = {
         "search_total_cnt":total_cnt,
@@ -96,8 +96,8 @@ def get_metrics(df):
         "gf_ratio":gf_ratio,
         "gf25_ratio":gf25_ratio,
         "gf50_ratio":gf50_ratio,
-        "gf25_avg_ratio":gf25_avg_ratio,
-        "gf50_avg_ratio":gf50_avg_ratio,
+        "gf25_cnt_ratio_avg":gf25_cnt_ratio_avg,
+        "gf50_cnt_ratio_avg":gf50_cnt_ratio_avg,
     }
     final_df.show()
     print(metrics)
