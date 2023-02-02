@@ -49,7 +49,7 @@ class MLMetrics():
                         ).parquet(*paths)
         metric_df = get_metrics(df)
         wbucket = "hiretual-ml-data-test"
-        pre = "dataplat_test/data/tmp/mid_metrics"
+        pre = "dataplat_test/data/tmp/%s_mid_metrics" % (self.runenv,)
         wpath = "s3://%s/%s" % (wbucket,pre)
         del_s3_folder(wbucket,pre )
         print(paths,)
@@ -69,6 +69,7 @@ if __name__ == "__main__":
     start_date = args.start_date
     end_date = args.end_date
     runenv = args.runenv
+    print("runenv",runenv)
     print("start_time",start_time)
     print("start_date",start_date)
     print("end_date",end_date)
