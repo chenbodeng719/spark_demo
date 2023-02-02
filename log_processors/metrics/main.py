@@ -48,7 +48,11 @@ class MLMetrics():
                         ).option("filterPushdown", "true"
                         ).parquet(*paths)
         metric_df = get_metrics(df)
-        wpath = "s3://hiretual-ml-data-test/dataplat_test/data/tmp/mid_metrics"
+        wbucket = "hiretual-ml-data-test"
+        pre = "dataplat_test/data/tmp/mid_metrics"
+        wpath = "s3://%s/%s" % (wbucket,pre)
+        del_s3_folder(wbucket,pre )
+        print("wpath",wpath)
         metric_df.write.parquet(wpath)
         
 
