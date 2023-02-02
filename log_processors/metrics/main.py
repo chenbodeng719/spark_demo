@@ -47,7 +47,9 @@ class MLMetrics():
         df = sqlc.read.option("mergeSchema", "false"
                         ).option("filterPushdown", "true"
                         ).parquet(*paths)
-        get_metrics(df)
+        metric_df = get_metrics(df)
+        wpath = "s3://hiretual-ml-data-test/dataplat_test/data/tmp/mid_metrics"
+        metric_df.write.parquet(wpath)
         
 
 
