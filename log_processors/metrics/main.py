@@ -24,7 +24,7 @@ class MLMetrics():
     
     def run(self,cate = ""):
         start_ts = get_ts8dtstr(self.start_date+" 00:00:00")
-        end_ts = get_ts8dtstr(self.end_date+" 00:00:00")
+        end_ts = get_ts8dtstr(self.end_date+" 00:00:00") + 86400
         diff_ts = end_ts - start_ts
         if diff_ts < 0:
             raise Exception("start_date is later than end_date.")
@@ -52,6 +52,7 @@ class MLMetrics():
         pre = "dataplat_test/data/tmp/mid_metrics"
         wpath = "s3://%s/%s" % (wbucket,pre)
         del_s3_folder(wbucket,pre )
+        print(paths,)
         print("wpath",wpath)
         metric_df.write.parquet(wpath)
         
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='emr submit')
     parser.add_argument('--start_time',help='submit start_time', required=True)
     parser.add_argument('--start_date',help='submit start_date', required=True)
-    parser.add_argument('--end_date',help='submit start_date', required=True)
+    parser.add_argument('--end_date',help='submit end_date', required=True)
     parser.add_argument('--runenv',help='submit runenv', required=False)
     args = parser.parse_args()
     start_time = args.start_time
