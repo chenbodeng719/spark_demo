@@ -1,4 +1,4 @@
-# spark demo
+# ML-metrics-script
 
 ## tips 
 - Your pyspark job project must contain the following files. 
@@ -9,11 +9,8 @@
 ## main func
 ### spark
 - main.py
-- setup.sh4
+- setup.sh
 - command
-```
-python -u main.py --cate spark_hbase_local
-```
 ## command
 - common
 ```

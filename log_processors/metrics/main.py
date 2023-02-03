@@ -49,10 +49,10 @@ class MLMetrics():
                         ).parquet(*paths)
         metric_df = get_metrics(df)
         wbucket = "hiretual-ml-data-test"
-        pre = "dataplat_test/data/tmp/%s_mid_metrics" % (self.runenv,)
+        pre = "dataplat_test/data/tmp/%s_mid_metrics_v2" % (self.runenv,)
         wpath = "s3://%s/%s" % (wbucket,pre)
         del_s3_folder(wbucket,pre )
-        print(paths,)
+        print(paths,len(paths))
         print("wpath",wpath)
         metric_df.write.parquet(wpath)
         
